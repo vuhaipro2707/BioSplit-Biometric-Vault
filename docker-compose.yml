@@ -3,7 +3,7 @@ services:
     build: .
     container_name: biosplit_vault
     ports:
-      - "8501:8501"
+      - "80:8501"
     restart: always
     volumes:
       - ./library:/app/library
