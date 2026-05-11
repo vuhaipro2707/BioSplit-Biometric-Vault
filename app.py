@@ -121,14 +121,24 @@ with tab2:
             if img1.shape != img2.shape:
                 st.error("Error: Shares must have the same resolution!")
             else:
-                recovered = BioSplitLogic.decrypt(img1, img2)
+                recovered, integrity = BioSplitLogic.decrypt(img1, img2)
                 _, rec_buffer = cv2.imencode(".png", recovered)
-                st.session_state.recovered_img = (rec_buffer.tobytes(), recovered)
+                st.session_state.recovered_img = (rec_buffer.tobytes(), recovered, integrity)
                 st.balloons()
 
         if st.session_state.recovered_img:
-            rec_bytes, rec_raw = st.session_state.recovered_img
+            rec_bytes, rec_raw, integrity = st.session_state.recovered_img
             st.image(rec_raw, caption="RECOVERED SECRET")
+            
+            # Display Integrity Metrics
+            st.metric("Integrity Score (Bit Check)", f"{integrity:.2f}%")
+            if integrity > 99.9:
+                st.success("✅ Perfect Data Integrity. The shares match the original secret.")
+            elif integrity > 90.0:
+                st.warning("⚠️ High Integrity, but some noise detected.")
+            else:
+                st.error("❌ Low Integrity! The shares may have been tampered with or are from different sessions.")
+                
             st.download_button("Download Recovered Secret", rec_bytes, "recovered_secret.png", mime="image/png")
 
 # --- TAB 3: SINGLE EXTRACT ---
